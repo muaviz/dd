@@ -1,3 +1,4 @@
+#include "hash_object.h"
 #include "help.h"
 #include "init.h"
 #include <cstdio>
@@ -9,13 +10,18 @@ typedef struct {
   int (*handler)(int, char **);
 } command;
 
-command commands[] = {{"--help", "Prints usage", help},
-                      {"init", "Initialises a .dd/ directory", dd_init}};
+command commands[] = {
+    {"--help", "Prints usage", help},
+    {"init", "Initialises a .dd/ directory", dd_init},
+    {"hash-object", "Hashes a given file", hash_object},
+};
 
 int main(int argc, char *argv[]) {
   for (const command &x : commands) {
     if (argc == 1 || strcmp(x.name, argv[1]) == 0) {
-      if (x.handler(argc--, argv++) != 0) {
+      int n_argc = argc - 1;
+      char **n_argv = argv + 1;
+      if (x.handler(n_argc, n_argv) != 0) {
         return 1;
       } else {
         return 0;

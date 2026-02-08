@@ -2,6 +2,7 @@
 #include "hash.h"
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -24,7 +25,7 @@ std::filesystem::path object_path_from_hash(const std::string &hash) {
   std::string dir_name = hash.substr(0, 2);
   std::string file_name = hash.substr(2, hash.size() - 2);
 
-  std::filesystem::path objs_path = ".vcs/objects/";
+  std::filesystem::path objs_path = ".dd/objects/";
   objs_path /= dir_name;
   objs_path /= file_name;
 
@@ -32,10 +33,15 @@ std::filesystem::path object_path_from_hash(const std::string &hash) {
 }
 
 std::string write_object(const object &obj) {
+  std::filesystem::path DD_DIR = ".dd/";
+  if (!std::filesystem::exists(DD_DIR)) {
+    throw std::runtime_error("Not a dd repository");
+  }
   std::vector<uint8_t> to_hash = serialise_obj(obj);
   std::string hash = hash_bytes(to_hash);
   std::filesystem::path obj_path = object_path_from_hash(hash);
   std::filesystem::path p_path = obj_path.parent_path();
+
   if (!std::filesystem::exists(p_path)) {
     if (!std::filesystem::create_directories(p_path)) {
       throw std::runtime_error("Couldn't create directories");
