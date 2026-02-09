@@ -1,8 +1,48 @@
 #include "index.h"
 
 index load_index() {
-  // TODO
+  index idx;
+  const char* path= ".dd/index";
+  FILE *fp =fopen(path ,"r");
+  //empty index
+  if(!fp){
+    return index();
+  } 
+  char buffer[512];
+  //read line by line
+  while(fgets( buffer ,sizeof(buffer),fp)){
+    std::string line =buffer;
+    if (!line.empty() && line.back() == '\n') {
+    line.pop_back();
+    }
+    
+    size_t space_pos = line.find(' ');
+    //  no silent failure  
+    if(space_pos == std::string::npos ){
+      fclose(fp);
+
+      throw std::runtime_error("Malformed line:no space");
+    }
+    //spilt at first place
+    std::string hash = line.substr(0, space_pos);
+    std::string path = line.substr(space_pos + 1);
+// invalid hash length
+if (hash.length() !=40 ) { 
+    fclose(fp);
+    throw std::runtime_error("Invalid hash length");
 }
+  
+  index_entry entry;
+entry.hash = hash;
+entry.path = path;
+//index.entries
+idx.entries.push_back(entry);
+}
+fclose(fp);
+    return idx;
+}
+
+
 
 void write_index(const index &index) {
   const char *path = ".dd/index";
@@ -23,7 +63,7 @@ void write_index(const index &index) {
 }
 
 void index_add(index &index, const std::string &path,
-               const std : string &hash) {
+               const std:string &hash) {
   for (auto &x : index.entries) {
     if (x.path == path) {
       x.hash = hash;
